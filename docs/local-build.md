@@ -87,6 +87,7 @@ opencode --version
 # 输出: 1.18.1-local
 ```
 
+> 如果需要使用 `opencode` 命令名，将软链接改为 `~/bin/opencode` 即可。
 > 如果 `opencode --version` 显示旧版本，检查 `which opencode`，确认 `~/bin` 在 PATH 中优先级高于其他安装路径（如 `/opt/homebrew/bin`）。
 
 ## 4. 迁移 Session（可选）
