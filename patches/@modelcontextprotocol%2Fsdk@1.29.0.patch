@@ -627,6 +627,32 @@ index 624172aa24ae255a67c083f9c19053343e4a0581..ac75b14545fda44aff7ff4d97cc5da88
                      }
                  }
                  throw new StreamableHTTPError(response.status, `Error POSTing to endpoint: ${text}`);
+diff --git a/dist/cjs/types.js b/dist/cjs/types.js
+index 0f63c4d7cb7ea6f2c430ec0ac0cc01310c419327..f55cc86e7fb2f5db5dcb29cf9bf0d44748dbfe63 100644
+--- a/dist/cjs/types.js
++++ b/dist/cjs/types.js
+@@ -32,7 +32,7 @@ exports.assertCompleteRequestResourceTemplate = assertCompleteRequestResourceTemp
+ const z = __importStar(require("zod/v4"));
+ exports.LATEST_PROTOCOL_VERSION = '2025-11-25';
+ exports.DEFAULT_NEGOTIATED_PROTOCOL_VERSION = '2025-03-26';
+-exports.SUPPORTED_PROTOCOL_VERSIONS = [exports.LATEST_PROTOCOL_VERSION, '2025-06-18', '2025-03-26', '2024-11-05', '2024-10-07'];
++exports.SUPPORTED_PROTOCOL_VERSIONS = [exports.LATEST_PROTOCOL_VERSION, '2026-07-28', '2025-06-18', '2025-03-26', '2024-11-05', '2024-10-07'];
+ exports.RELATED_TASK_META_KEY = 'io.modelcontextprotocol/related-task';
+ /* JSON-RPC types */
+ exports.JSONRPC_VERSION = '2.0';
+diff --git a/dist/esm/types.js b/dist/esm/types.js
+index 0f98cc356a4640e9ca99f194859e9542d5e21a7f..95b6a60d92e09909df14e8cb6e0f373df1628ec6 100644
+--- a/dist/esm/types.js
++++ b/dist/esm/types.js
+@@ -1,7 +1,7 @@
+ import * as z from 'zod/v4';
+ export const LATEST_PROTOCOL_VERSION = '2025-11-25';
+ export const DEFAULT_NEGOTIATED_PROTOCOL_VERSION = '2025-03-26';
+-export const SUPPORTED_PROTOCOL_VERSIONS = [LATEST_PROTOCOL_VERSION, '2025-06-18', '2025-03-26', '2024-11-05', '2024-10-07'];
++export const SUPPORTED_PROTOCOL_VERSIONS = [LATEST_PROTOCOL_VERSION, '2026-07-28', '2025-06-18', '2025-03-26', '2024-11-05', '2024-10-07'];
+ export const RELATED_TASK_META_KEY = 'io.modelcontextprotocol/related-task';
+ /* JSON-RPC types */
+ /**
 diff --git a/dist/esm/shared/protocol.js b/dist/esm/shared/protocol.js
 index bfa2b7120a0f50c569364ea5264e6f811076f44f..abd8dfd707c155f71dae7aeeeeaf7547368ac749 100644
 --- a/dist/esm/shared/protocol.js
