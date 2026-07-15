@@ -10,6 +10,7 @@ import { useLocal } from "../context/local"
 import { usePluginRuntime } from "../plugin/runtime"
 import { useEditorContext } from "../context/editor"
 import { useTerminalDimensions } from "@opentui/solid"
+import { useTheme } from "../context/theme"
 import { useTuiConfig } from "../config"
 import { HomeSessionDestinationProvider } from "./home/session-destination"
 
@@ -20,6 +21,7 @@ const placeholder = {
 }
 
 export function Home() {
+  const { theme } = useTheme()
   const pluginRuntime = usePluginRuntime()
   const sync = useSync()
   const route = useRouteData("home")
@@ -78,6 +80,9 @@ export function Home() {
           </pluginRuntime.Slot>
         </box>
         <box height={1} minHeight={0} flexShrink={1} />
+        <box alignItems="center">
+          <text fg={theme.textMuted} selectable={false}>— local —</text>
+        </box>
         <box width="100%" maxWidth={promptMaxWidth()} zIndex={1000} paddingTop={1} flexShrink={0}>
           <pluginRuntime.Slot name="home_prompt" mode="replace" ref={bind}>
             <Prompt ref={bind} right={<pluginRuntime.Slot name="home_prompt_right" />} placeholders={placeholder} />
