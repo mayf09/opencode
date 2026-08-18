@@ -38,6 +38,13 @@ export const Info = Schema.Struct({
   server: Schema.optional(ConfigServerV1.Server).annotate({
     description: "Server configuration for opencode serve and web commands",
   }),
+  sidebar: Schema.optional(
+    Schema.Struct({
+      mode: Schema.optional(Schema.Literals(["auto", "hide"])).annotate({
+        description: "Sidebar default visibility mode",
+      }),
+    }),
+  ).annotate({ description: "Sidebar settings" }),
   command: Schema.optional(Schema.Record(Schema.String, ConfigCommandV1.Info)).annotate({
     description: "Command configuration, see https://opencode.ai/docs/commands",
   }),

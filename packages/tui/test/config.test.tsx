@@ -46,6 +46,8 @@ test("validates config constraints", () => {
   expect(() => decodeInfo({ scroll_speed: 0 })).toThrow()
   expect(() => decodeInfo({ cursor: { style: "beam" } })).toThrow()
   expect(decodeInfo({ attention: { sounds: { unknown: "sound.wav" } } })).toEqual({ attention: { sounds: {} } })
+  expect(decodeInfo({ sidebar: { mode: "hide" } })).toEqual({ sidebar: { mode: "hide" } })
+  expect(() => decodeInfo({ sidebar: { mode: "show" } })).toThrow()
 })
 
 test("resolves host-neutral defaults", () => {
