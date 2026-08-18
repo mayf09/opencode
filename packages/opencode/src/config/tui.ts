@@ -4,7 +4,7 @@ import path from "path"
 import { mergeDeep, unique } from "remeda"
 import { AppNodeBuilder } from "@opencode-ai/core/effect/app-node-builder"
 import { LayerNode } from "@opencode-ai/core/effect/layer-node"
-import { Cause, Context, Effect, Fiber, Layer } from "effect"
+import { Cause, Context, Effect, Fiber, Layer, Option, Schema } from "effect"
 import { ConfigParse } from "@/config/parse"
 import * as ConfigPaths from "@/config/paths"
 import { migrateTuiConfig } from "./tui-migrate"
@@ -83,6 +83,7 @@ function dropUnknownKeybinds(input: Record<string, unknown>) {
 const loadState = Effect.fn("TuiConfig.loadState")(function* (ctx: { directory: string }) {
   const afs = yield* FSUtil.Service
   let appliedOrder = 0
+  const SidebarInfo = Schema.Struct({ sidebar: TuiConfig.Sidebar })
 
   const resolvePlugins = (config: Info, configFilepath: string): Effect.Effect<Info> =>
     Effect.gen(function* () {
@@ -146,6 +147,18 @@ const loadState = Effect.fn("TuiConfig.loadState")(function* (ctx: { directory: 
       return yield* load(text, filepath)
     })
 
+  const loadSidebar = (filepath: string): Effect.Effect<Info["sidebar"]> =>
+    Effect.gen(function* () {
+      const text = yield* afs.readFileStringSafe(filepath)
+      if (!text) return undefined
+      const expanded = yield* Effect.promise(() =>
+        ConfigVariable.substitute({ text, type: "path", path: filepath, missing: "empty" }),
+      )
+      const data = ConfigParse.jsonc(expanded, filepath)
+      if (!isRecord(data) || !isRecord(data.sidebar)) return undefined
+      return Option.getOrUndefined(Schema.decodeUnknownOption(SidebarInfo)(data))?.sidebar
+    }).pipe(Effect.catchCause(() => Effect.succeed(undefined)))
+
   const mergeFile = (acc: Acc, file: string) =>
     Effect.gen(function* () {
       const data = yield* loadFile(file)
@@ -174,6 +187,17 @@ const loadState = Effect.fn("TuiConfig.loadState")(function* (ctx: { directory: 
   yield* Effect.promise(() => migrateTuiConfig({ directories, cwd: ctx.directory }))
 
   const projectFiles = Flag.OPENCODE_DISABLE_PROJECT_CONFIG ? [] : yield* ConfigPaths.files("tui", ctx.directory)
+  const dirs = unique(directories).filter((dir) => dir.endsWith(".opencode") || dir === Flag.OPENCODE_CONFIG_DIR)
+  const opencodeFiles = [
+    ...ConfigPaths.fileInDirectory(Global.Path.config, "opencode"),
+    ...(Flag.OPENCODE_CONFIG ? [Flag.OPENCODE_CONFIG] : []),
+    ...(Flag.OPENCODE_DISABLE_PROJECT_CONFIG ? [] : yield* ConfigPaths.files("opencode", ctx.directory)),
+    ...dirs.flatMap((dir) => ConfigPaths.fileInDirectory(dir, "opencode")),
+  ]
+  let sidebar: Info["sidebar"]
+  for (const file of opencodeFiles) {
+    sidebar = (yield* loadSidebar(file)) ?? sidebar
+  }
 
   const acc: Acc = {
     result: {},
@@ -200,8 +224,6 @@ const loadState = Effect.fn("TuiConfig.loadState")(function* (ctx: { directory: 
   // 4. `.opencode` directories (and OPENCODE_CONFIG_DIR) discovered while
   // walking up the tree. Also returned below so callers can install plugin
   // dependencies from each location.
-  const dirs = unique(directories).filter((dir) => dir.endsWith(".opencode") || dir === Flag.OPENCODE_CONFIG_DIR)
-
   for (const dir of dirs) {
     if (!dir.endsWith(".opencode") && dir !== Flag.OPENCODE_CONFIG_DIR) continue
     for (const file of ConfigPaths.fileInDirectory(dir, "tui")) {
@@ -212,6 +234,7 @@ const loadState = Effect.fn("TuiConfig.loadState")(function* (ctx: { directory: 
   const result = TuiConfig.resolve(
     {
       ...acc.result,
+      sidebar: acc.result.sidebar ?? sidebar,
     },
     {
       terminalSuspend: process.platform !== "win32",

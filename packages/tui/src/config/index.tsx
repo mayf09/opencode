@@ -39,6 +39,13 @@ export const Cursor = Schema.Struct({
   }),
 }).annotate({ description: "Terminal cursor settings" })
 
+export const SidebarMode = Schema.Literals(["auto", "hide"]).annotate({
+  description: "Sidebar visibility mode: 'auto' shows the sidebar on wide terminals, 'hide' keeps it hidden by default",
+})
+export const Sidebar = Schema.Struct({
+  mode: Schema.optional(SidebarMode).annotate({ description: "Sidebar default visibility mode" }),
+}).annotate({ description: "Sidebar settings" })
+
 export const AttentionSounds = Schema.Record(AttentionSoundName, Schema.optionalKey(Schema.String))
 export type AttentionSoundPaths = Schema.Schema.Type<typeof AttentionSounds>
 export const Attention = Schema.Struct({
@@ -71,6 +78,7 @@ export const Info = Schema.Struct({
   scroll_acceleration: Schema.optional(ScrollAcceleration),
   diff_style: Schema.optional(DiffStyle),
   cursor: Schema.optional(Cursor),
+  sidebar: Schema.optional(Sidebar),
   mouse: Schema.optional(Schema.Boolean).annotate({ description: "Enable or disable mouse capture (default: true)" }),
 })
 export type Info = Schema.Schema.Type<typeof Info>

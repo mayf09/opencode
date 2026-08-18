@@ -141,6 +141,21 @@ it.instance("loads tui config with the same precedence order as server config pa
   ),
 )
 
+it.instance("loads sidebar mode from opencode.json", () =>
+  withCleanState(
+    Effect.gen(function* () {
+      const fs = yield* FSUtil.Service
+      const test = yield* TestInstance
+      yield* fs.writeJson(path.join(Global.Path.config, "opencode.json"), { sidebar: { mode: "hide" } })
+
+      expect((yield* getTuiConfig(test.directory)).sidebar).toEqual({ mode: "hide" })
+
+      yield* fs.writeJson(path.join(test.directory, "opencode.json"), { sidebar: { mode: "auto" } })
+      expect((yield* getTuiConfig(test.directory)).sidebar).toEqual({ mode: "auto" })
+    }),
+  ),
+)
+
 it.instance("resolves attention config defaults and overrides", () =>
   withCleanState(
     Effect.gen(function* () {

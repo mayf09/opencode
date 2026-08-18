@@ -399,6 +399,17 @@ You can customize TUI behavior through `tui.json` (or `tui.jsonc`).
 
 This is separate from `opencode.json`, which configures server/runtime behavior.
 
+The sidebar's default visibility is configured in `opencode.json`:
+
+```json title="opencode.json"
+{
+  "$schema": "https://opencode.ai/config.json",
+  "sidebar": {
+    "mode": "hide"
+  }
+}
+```
+
 `keybinds` is merged with built-in defaults, so you only need to configure the shortcuts you want to change.
 
 ### Options
@@ -410,6 +421,7 @@ This is separate from `opencode.json`, which configures server/runtime behavior.
 - `scroll_speed` - Controls how fast the TUI scrolls when using scroll commands (minimum: `0.001`, supports decimal values). Defaults to `3`. **Note: This is ignored if `scroll_acceleration.enabled` is set to `true`.**
 - `diff_style` - Controls diff rendering. `"auto"` adapts to terminal width, `"stacked"` always shows a single-column layout.
 - `cursor` - Controls the terminal cursor in TUI input fields. `style` defaults to `"block"`, can be `"underline"`, `"line"`, or `"default"`; `blinking` defaults to `true`. When `style` is `"default"`, the terminal default cursor is restored, so `blinking` has no effect.
+- `sidebar.mode` - In `opencode.json`, controls the sidebar's default visibility on startup. `"auto"` (default) shows the sidebar on wide terminals, `"hide"` keeps it hidden. You can still toggle it with the `sidebar_toggle` keybind during a session.
 - `mouse` - Enable or disable mouse capture in the TUI (default: `true`). When disabled, the terminal's native mouse selection/scrolling behavior is preserved.
 - `attention` - Configures TUI desktop notifications and sounds. Disabled by default.
 

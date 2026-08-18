@@ -271,6 +271,10 @@ export function Session() {
   const sidebarVisible = createMemo(() => {
     if (session()?.parentID) return false
     if (sidebarOpen()) return true
+    // Config `sidebar.mode` is scoped to the current config (project vs global)
+    // and read directly here, never written to the global KV state. A runtime
+    // `ctrl+x b` toggle still works via the overlay signal above.
+    if (tuiConfig.sidebar?.mode === "hide") return false
     if (sidebar() === "auto" && wide()) return true
     return false
   })
