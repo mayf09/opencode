@@ -4,10 +4,16 @@
 
 ## 前置要求
 
-- **Bun 1.3+**：项目 `packageManager` 字段指定 `1.3.14`，建议使用相同版本
+- **Bun 1.3.14**：项目 `packageManager` 字段指定了精确版本，编译时必须使用该版本
 
 ```bash
-bun --version
+bunx bun@1.3.14 --version
+```
+
+不要用 Bun 1.4.x 编译。已验证 Bun 1.4.2 生成的二进制会在加载 `references` 时崩溃：
+
+```text
+undefined is not an object (evaluating 'a.name')
 ```
 
 ## 1. 安装依赖
@@ -29,8 +35,8 @@ HTTP_PROXY=http://localhost:8118 HTTPS_PROXY=http://localhost:8118 bun install
 ## 2. 编译二进制
 
 ```bash
-OPENCODE_CHANNEL=local OPENCODE_VERSION=1.18.1-local \
-  ./packages/opencode/script/build.ts --single --skip-install
+OPENCODE_CHANNEL=local OPENCODE_VERSION=1.18.35-local \
+  bunx bun@1.3.14 ./packages/opencode/script/build.ts --single --skip-install
 ```
 
 参数说明：
@@ -40,7 +46,7 @@ OPENCODE_CHANNEL=local OPENCODE_VERSION=1.18.1-local \
 | `--single` | 仅编译当前平台（如 `darwin-arm64`），不交叉编译全部 12 个目标 |
 | `--skip-install` | 跳过 `bun install --os="*" --cpu="*"` 跨平台依赖下载步骤（该步骤会下载 Windows/Linux 的 native 包，在国内网络环境容易超时） |
 | `OPENCODE_CHANNEL=local` | 设置 channel 为 `local`，数据库将使用 `opencode-local.db`，与发布版隔离 |
-| `OPENCODE_VERSION=1.18.1-local` | 版本号使用 release 版本加 `-local` 后缀，便于区分 |
+| `OPENCODE_VERSION=1.18.35-local` | 版本号使用 release 版本加 `-local` 后缀，便于区分 |
 
 编译产物位于 `packages/opencode/dist/opencode-<platform>/bin/opencode`。
 
@@ -48,7 +54,7 @@ OPENCODE_CHANNEL=local OPENCODE_VERSION=1.18.1-local \
 
 ```bash
 ./packages/opencode/dist/opencode-darwin-arm64/bin/opencode --version
-# 输出: 1.18.1-local
+# 输出: 1.18.35-local
 ```
 
 ### Channel 与数据库
@@ -84,13 +90,28 @@ export PATH="$HOME/bin:$PATH"
 
 ```bash
 opencode --version
-# 输出: 1.18.1-local
+# 输出: 1.18.35-local
 ```
 
 > 如果需要使用 `opencode` 命令名，将软链接改为 `~/bin/opencode` 即可。
 > 如果 `opencode --version` 显示旧版本，检查 `which opencode`，确认 `~/bin` 在 PATH 中优先级高于其他安装路径（如 `/opt/homebrew/bin`）。
 
-## 4. 迁移 Session（可选）
+## 4. 配置默认隐藏侧边栏
+
+在 `opencode.json` 中设置：
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "sidebar": {
+    "mode": "hide"
+  }
+}
+```
+
+`"auto"` 是默认值，只在宽终端显示侧边栏；`"hide"` 默认隐藏。会话中仍可通过侧边栏快捷键临时切换。
+
+## 5. 迁移 Session（可选）
 
 切换 channel 后数据库会变。如需从旧库迁移 session：
 
@@ -120,6 +141,24 @@ BUN_CONFIG_REGISTRY=https://registry.npmmirror.com bun install
 ### 编译时报 @esbuild 下载失败
 
 加 `--skip-install` 跳过跨平台依赖下载。
+
+### 编译时报 models.dev/api.json 连接失败
+
+`build.ts` 会通过 `script/generate.ts` 拉取 `https://models.dev/api.json`（模型数据，约 4MB）嵌入二进制。网络受限时直接 `fetch` 会报 `ConnectionRefused`。
+
+解决方案：先用代理下载一份快照，再通过 `MODELS_DEV_API_JSON` 指向本地文件，绕过网络：
+
+```bash
+# 1. 通过代理下载（或任意可达方式获取）模型数据快照
+curl -s -x http://localhost:8118 -o /tmp/models-api.json https://models.dev/api.json
+
+# 2. 编译时指定本地快照
+OPENCODE_CHANNEL=local OPENCODE_VERSION=1.18.35-local \
+  MODELS_DEV_API_JSON=/tmp/models-api.json \
+  bunx bun@1.3.14 ./packages/opencode/script/build.ts --single --skip-install
+```
+
+> 快照可复用，同一份文件可反复用于多次编译，无需每次重新下载。
 
 ### 数据库文件损坏
 
