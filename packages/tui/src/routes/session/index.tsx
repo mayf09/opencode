@@ -140,6 +140,7 @@ const sessionBindingCommands = [
   "session.parent",
   "session.child.next",
   "session.child.previous",
+  "session.child.delete",
 ] as const
 
 const sessionGlobalBindingCommands = [
@@ -464,6 +465,44 @@ export function Session() {
       if (!session()?.parentID || dialog.stack.length > 0) return
       func()
     }
+  }
+
+  async function deleteChildSession() {
+    const current = session()
+    if (!current?.parentID) return
+
+    const status = sync.data.session_status?.[current.id]
+    if (status && status.type !== "idle") {
+      toast.show({ message: "Cannot delete a subagent while it is running", variant: "warning" })
+      return
+    }
+
+    const confirmed = await DialogConfirm.show(
+      dialog,
+      "Delete Subagent",
+      "Delete this completed subagent and its messages?",
+      "Delete",
+    )
+    if (confirmed !== true) return
+
+    const siblings = sync.data.session
+      .filter((item) => item.parentID === current.parentID)
+      .toSorted((a, b) => a.time.created - b.time.created)
+    const index = siblings.findIndex((item) => item.id === current.id)
+    const next = siblings[index + 1] ?? siblings[index - 1]
+
+    navigate(next ? { type: "session", sessionID: next.id } : { type: "session", sessionID: current.parentID })
+
+    await sdk.client.session
+      .delete({ sessionID: current.id })
+      .catch((error) => {
+        navigate({ type: "session", sessionID: current.id })
+        toast.show({
+          message: errorMessage(error),
+          variant: "error",
+          title: "Failed to delete subagent",
+        })
+      })
   }
 
   const sessionCommandList = createMemo(() => [
@@ -1083,6 +1122,19 @@ export function Session() {
       run: childSessionHandler(() => {
         dialog.clear()
         moveChild(-1)
+      }),
+    },
+    {
+      title: "Delete completed subagent",
+      value: "session.child.delete",
+      category: "Session",
+      hidden: true,
+      enabled:
+        !!session()?.parentID &&
+        (!sync.data.session_status?.[route.sessionID] || sync.data.session_status[route.sessionID]?.type === "idle"),
+      run: childSessionHandler(() => {
+        dialog.clear()
+        void deleteChildSession()
       }),
     },
   ])

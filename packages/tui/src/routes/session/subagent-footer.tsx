@@ -59,7 +59,8 @@ export function SubagentFooter() {
   const parentShortcut = useCommandShortcut("session.parent")
   const previousShortcut = useCommandShortcut("session.child.previous")
   const nextShortcut = useCommandShortcut("session.child.next")
-  const [hover, setHover] = createSignal<"parent" | "prev" | "next" | null>(null)
+  const deleteShortcut = useCommandShortcut("session.child.delete")
+  const [hover, setHover] = createSignal<"parent" | "prev" | "next" | "delete" | null>(null)
   useTerminalDimensions()
 
   return (
@@ -122,6 +123,16 @@ export function SubagentFooter() {
             >
               <text fg={theme.text}>
                 Next <span style={{ fg: theme.textMuted }}>{nextShortcut()}</span>
+              </text>
+            </box>
+            <box
+              onMouseOver={() => setHover("delete")}
+              onMouseOut={() => setHover(null)}
+              onMouseUp={() => keymap.dispatchCommand("session.child.delete")}
+              backgroundColor={hover() === "delete" ? theme.backgroundElement : theme.backgroundPanel}
+            >
+              <text fg={theme.text}>
+                Delete <span style={{ fg: theme.textMuted }}>{deleteShortcut()}</span>
               </text>
             </box>
           </box>
