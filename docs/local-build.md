@@ -35,7 +35,7 @@ HTTP_PROXY=http://localhost:8118 HTTPS_PROXY=http://localhost:8118 bun install
 ## 2. 编译二进制
 
 ```bash
-OPENCODE_CHANNEL=local OPENCODE_VERSION=1.18.35-local \
+OPENCODE_CHANNEL=local OPENCODE_VERSION=1.19.0-local \
   bunx bun@1.3.14 ./packages/opencode/script/build.ts --single --skip-install
 ```
 
@@ -46,7 +46,7 @@ OPENCODE_CHANNEL=local OPENCODE_VERSION=1.18.35-local \
 | `--single` | 仅编译当前平台（如 `darwin-arm64`），不交叉编译全部 12 个目标 |
 | `--skip-install` | 跳过 `bun install --os="*" --cpu="*"` 跨平台依赖下载步骤（该步骤会下载 Windows/Linux 的 native 包，在国内网络环境容易超时） |
 | `OPENCODE_CHANNEL=local` | 设置 channel 为 `local`，数据库将使用 `opencode-local.db`，与发布版隔离 |
-| `OPENCODE_VERSION=1.18.35-local` | 版本号使用 release 版本加 `-local` 后缀，便于区分 |
+| `OPENCODE_VERSION=1.19.0-local` | 版本号使用 release 版本加 `-local` 后缀，便于区分 |
 
 编译产物位于 `packages/opencode/dist/opencode-<platform>/bin/opencode`。
 
@@ -54,7 +54,7 @@ OPENCODE_CHANNEL=local OPENCODE_VERSION=1.18.35-local \
 
 ```bash
 ./packages/opencode/dist/opencode-darwin-arm64/bin/opencode --version
-# 输出: 1.18.35-local
+# 输出: 1.19.0-local
 ```
 
 ### Channel 与数据库
@@ -90,7 +90,7 @@ export PATH="$HOME/bin:$PATH"
 
 ```bash
 opencode --version
-# 输出: 1.18.35-local
+# 输出: 1.19.0-local
 ```
 
 > 如果需要使用 `opencode` 命令名，将软链接改为 `~/bin/opencode` 即可。
@@ -153,7 +153,7 @@ BUN_CONFIG_REGISTRY=https://registry.npmmirror.com bun install
 curl -s -x http://localhost:8118 -o /tmp/models-api.json https://models.dev/api.json
 
 # 2. 编译时指定本地快照
-OPENCODE_CHANNEL=local OPENCODE_VERSION=1.18.35-local \
+OPENCODE_CHANNEL=local OPENCODE_VERSION=1.19.0-local \
   MODELS_DEV_API_JSON=/tmp/models-api.json \
   bunx bun@1.3.14 ./packages/opencode/script/build.ts --single --skip-install
 ```
