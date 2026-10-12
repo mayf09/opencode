@@ -14,7 +14,6 @@ import { useTheme } from "../context/theme"
 import { useTuiConfig } from "../config"
 import { HomeSessionDestinationProvider } from "./home/session-destination"
 import { useUpdateNotification } from "../context/update-notification"
-import { useTheme } from "../context/theme"
 import { useExit } from "../context/exit"
 
 let once = false
